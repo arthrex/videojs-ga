@@ -24,7 +24,9 @@ videojs.plugin 'ga', (options = {}) ->
   eventCategory = options.eventCategory || dataSetupOptions.eventCategory || 'Video'
   # if you didn't specify a name, it will be 'guessed' from the video src after metadatas are loaded
   eventLabel = options.eventLabel || dataSetupOptions.eventLabel
-
+  # if a custom dimension for percent played is defined in GA, allow it's ID to be passed in
+  percentPlayedCustomDimensionID = options.percentPlayedCustomDimensionID || dataSetupOptions.percentPlayedCustomDimensionID || '';
+  
   # if debug isn't specified
   options.debug = options.debug || false
 
@@ -32,6 +34,7 @@ videojs.plugin 'ga', (options = {}) ->
   percentsAlreadyTracked = []
   seekStart = seekEnd = 0
   seeking = false
+  percentPlayed = 0
 
   loaded = ->
     unless eventLabel
@@ -113,6 +116,9 @@ videojs.plugin 'ga', (options = {}) ->
   sendbeacon = ( action, nonInteraction, value ) ->
     # console.log action, " ", nonInteraction, " ", value
     if window.ga
+      if percentPlayedCustomDimensionID.length
+        ga 'set', percentPlayedCustomDimensionID, percentPlayed
+
       ga 'send', 'event',
         'eventCategory' 	: eventCategory
         'eventAction'		  : action

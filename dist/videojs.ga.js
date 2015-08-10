@@ -1,5 +1,5 @@
 /*
-* videojs-ga - v0.4.2 - 2015-02-06
+* videojs-ga - v0.4.2 - 2015-08-10
 * Copyright (c) 2015 Michael Bensoussan
 * Licensed MIT
 */
@@ -7,7 +7,7 @@
   var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   videojs.plugin('ga', function(options) {
-    var dataSetupOptions, defaultsEventsToTrack, end, error, eventCategory, eventLabel, eventsToTrack, fullscreen, loaded, parsedOptions, pause, percentsAlreadyTracked, percentsPlayedInterval, play, resize, seekEnd, seekStart, seeking, sendbeacon, timeupdate, volumeChange;
+    var dataSetupOptions, defaultsEventsToTrack, end, error, eventCategory, eventLabel, eventsToTrack, fullscreen, loaded, parsedOptions, pause, percentPlayed, percentPlayedCustomDimensionID, percentsAlreadyTracked, percentsPlayedInterval, play, resize, seekEnd, seekStart, seeking, sendbeacon, timeupdate, volumeChange;
     if (options == null) {
       options = {};
     }
@@ -23,10 +23,12 @@
     percentsPlayedInterval = options.percentsPlayedInterval || dataSetupOptions.percentsPlayedInterval || 10;
     eventCategory = options.eventCategory || dataSetupOptions.eventCategory || 'Video';
     eventLabel = options.eventLabel || dataSetupOptions.eventLabel;
+    percentPlayedCustomDimensionID = options.percentPlayedCustomDimensionID || dataSetupOptions.percentPlayedCustomDimensionID || '';
     options.debug = options.debug || false;
     percentsAlreadyTracked = [];
     seekStart = seekEnd = 0;
     seeking = false;
+    percentPlayed = 0;
     loaded = function() {
       if (!eventLabel) {
         eventLabel = this.currentSrc().split("/").slice(-1)[0].replace(/\.(\w{3,4})(\?.*)?$/i, '');
@@ -36,7 +38,7 @@
       }
     };
     timeupdate = function() {
-      var currentTime, duration, percent, percentPlayed, _i;
+      var currentTime, duration, percent, _i;
       currentTime = Math.round(this.currentTime());
       duration = Math.round(this.duration());
       percentPlayed = Math.round(currentTime / duration * 100);
@@ -103,6 +105,9 @@
     };
     sendbeacon = function(action, nonInteraction, value) {
       if (window.ga) {
+        if (percentPlayedCustomDimensionID.length) {
+          ga('set', percentPlayedCustomDimensionID, percentPlayed);
+        }
         ga('send', 'event', {
           'eventCategory': eventCategory,
           'eventAction': action,
